@@ -26,7 +26,7 @@ CREATE TABLE products (
 -- 3. Cart Table
 CREATE TABLE cart (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    cart_id VARCHAR(30) UNIQUE,      -- Format: CART-CUSTXXXX-XX
+    cart_id VARCHAR(30) UNIQUE,      -- Format: CT-CXXXXPXXXX-XX
     customer_id INT NOT NULL,
     product_id INT NOT NULL,
     quantity INT NOT NULL,
