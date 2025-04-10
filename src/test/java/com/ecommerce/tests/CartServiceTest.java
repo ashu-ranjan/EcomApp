@@ -33,7 +33,7 @@ public class CartServiceTest {
         service = new CartService();
         repo = new OrderProcessorRepositoryImpl();
 
-        customer1 = repo.loginCustomer("shivam@gmail.com","87654321");
+        customer1 = repo.loginCustomer("rohan@gmail.com","rohan123");
         product1 = repo.getProductByFormattedId("PROD-2025-0004");
 
         customer2 = repo.loginCustomer("shivam@gmail.com","87654328");
@@ -53,21 +53,21 @@ public class CartServiceTest {
 
     @Test
     public void testAddToCart1() { //Testing for Valid Customer and product
-        assertTrue(service.addToCartSample(customer1, product1, 3));
+        assertTrue(service.addToCartSample(customer1, product1, 1));
     }
 
     @Test
     public void testAddToCart2() { // Testing for Invalid Customer and Valid Product
-        assertFalse(service.addToCartSample(null, product1, 3), "Should fail for null customer");
+        assertFalse(service.addToCartSample(null, product1, 1), "Should fail for null customer");
     }
 
     @Test
     public void testAddToCart3() { // Testing for Valid Customer and invalid Product
-        assertFalse(service.addToCartSample(customer1, null, 3), "Should fail for null product");
+        assertFalse(service.addToCartSample(customer1, null, 1), "Should fail for null product");
     }
     @Test
     public void testAddToCart4() { // Testing for Invalid Customer and Product
-        assertFalse(service.addToCartSample(customer2, product2, 3));
+        assertFalse(service.addToCartSample(customer2, product2, 1));
     }
 
 

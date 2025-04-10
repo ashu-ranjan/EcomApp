@@ -33,7 +33,7 @@ public class ExceptionServiceTest {
         service = new ExceptionService();
         repo = new OrderProcessorRepositoryImpl();
 
-        customer1 = repo.loginCustomer("shivam@gmail.com","87654321");
+        customer1 = repo.loginCustomer("rohan@gmail.com","rohan123");
         product1 = repo.getProductByFormattedId("PROD-2025-0005");
 
         customer2 = repo.loginCustomer("shivam@gmail.com","87654328");
