@@ -48,7 +48,7 @@ public class OrderProcessorRepositoryImpl implements IOrderProcessorRepository {
                 return true;
             }
         } catch (SQLException e) {
-            logger.log(Level.SEVERE, "Error creating customer", e);
+            logger.log(Level.SEVERE, "Error creating customer");
         }
         return false;
     }
@@ -74,7 +74,7 @@ public class OrderProcessorRepositoryImpl implements IOrderProcessorRepository {
                 }
             }
         } catch (SQLException e) {
-            logger.log(Level.SEVERE, "Error during customer login", e);
+            logger.log(Level.SEVERE, "Error during customer login");
         }
         return null;
     }
@@ -99,7 +99,6 @@ public class OrderProcessorRepositoryImpl implements IOrderProcessorRepository {
                     int id = rs.getInt(1);
                     String formattedId = IdFormatterUtil.generateProductId(id);
 
-                    //String updateSql = "UPDATE products SET product_id = ? WHERE id = ?";
                     PreparedStatement updateStmt = conn.prepareStatement(EcomConstants.UPDATE_PROD_BY_ID);
                     updateStmt.setString(1, formattedId);
                     updateStmt.setInt(2, id);
@@ -111,11 +110,12 @@ public class OrderProcessorRepositoryImpl implements IOrderProcessorRepository {
                 return true;
             }
         } catch (SQLException e) {
-            logger.log(Level.SEVERE, "Error creating product", e);
+            logger.log(Level.SEVERE, "Error creating product");
         }
         return false;
     }
 
+    // delete product
     @Override
     public boolean deleteProduct(String formattedProductId) {
         int id = IdFormatterUtil.extractRawId(formattedProductId);
@@ -125,11 +125,12 @@ public class OrderProcessorRepositoryImpl implements IOrderProcessorRepository {
             pstmt.setInt(1, id);
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            logger.log(Level.SEVERE, "Error deleting product", e);
+            logger.log(Level.SEVERE, "Error deleting product");
         }
         return false;
     }
 
+    // delete customer
     @Override
     public boolean deleteCustomer(String formattedCustomerId) {
         int id = IdFormatterUtil.extractRawId(formattedCustomerId);
@@ -139,11 +140,12 @@ public class OrderProcessorRepositoryImpl implements IOrderProcessorRepository {
             pstmt.setInt(1, id);
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            logger.log(Level.SEVERE, "Error deleting customer", e);
+            logger.log(Level.SEVERE, "Error deleting customer");
         }
         return false;
     }
 
+    // add to cart method
     @Override
     public boolean addToCart(Customer customer, Product product, int quantity) {
         try {
@@ -175,36 +177,34 @@ public class OrderProcessorRepositoryImpl implements IOrderProcessorRepository {
             }
             return success;
 
-        } catch (SQLException | ProductNotFoundException e) {
-            logger.log(Level.SEVERE, "Error adding to cart", e);
+        } catch (SQLException | ProductNotFoundException e) { // HANDLING
+            logger.log(Level.SEVERE, "Error adding to cart");
         }
         return false;
     }
 
-    @Override
-    public Product getProductByFormattedId(String formattedId) {
 
+    @Override
+    public Product getProductByFormattedId(String formattedId) throws ProductNotFoundException{
+        Product product = null;
         try{
              PreparedStatement ps = conn.prepareStatement(EcomConstants.GET_PROD_BY_ID);
             ps.setString(1, formattedId);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                Product product = new Product();
-                product.setId(rs.getInt("id"));
-                product.setProductId(rs.getString("product_id"));
-                product.setName(rs.getString("name"));
-                product.setPrice(rs.getDouble("price"));
-                product.setDescription(rs.getString("description"));
-                product.setStockQuantity(rs.getInt("stock_quantity"));
-                return product;
+                product = extractProductFromResultSet(rs);
+            }
+            else {
+                throw new ProductNotFoundException("Product with ID : " + formattedId + " not found");
             }
         } catch (SQLException e) {
-            logger.log(Level.SEVERE, "Error fetching product by formatted ID", e);
+            logger.log(Level.SEVERE, "Error fetching product by formatted ID");
         }
-        return null;
+        return product;
     }
 
 
+    // remove items from cart
     @Override
     public boolean removeFromCart(Customer customer, Product product) {
 
@@ -214,11 +214,12 @@ public class OrderProcessorRepositoryImpl implements IOrderProcessorRepository {
             pstmt.setInt(2, product.getId());
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
-            logger.log(Level.SEVERE, "Error removing from cart", e);
+            logger.log(Level.SEVERE, "Error removing from cart");
         }
         return false;
     }
 
+    // get all from cart
     @Override
     public List<Map.Entry<Product, Integer>> getAllFromCart(Customer customer) {
         List<Map.Entry<Product, Integer>> productsWithQty = new ArrayList<>();
@@ -233,12 +234,14 @@ public class OrderProcessorRepositoryImpl implements IOrderProcessorRepository {
                 productsWithQty.add(new AbstractMap.SimpleEntry<>(product, quantity));
             }
         } catch (SQLException e) {
-            logger.log(Level.SEVERE, "Error getting cart products", e);
+            logger.log(Level.SEVERE, "Error getting cart products");
         }
         return productsWithQty;
     }
 
 
+
+    // placing order
     @Override
     public boolean placeOrder(Customer customer, List<Map.Entry<Product, Integer>> items, String shippingAddress) {
 
@@ -267,7 +270,7 @@ public class OrderProcessorRepositoryImpl implements IOrderProcessorRepository {
                 orderId = rs.getInt(1);
             }
 
-            // Generate formatted order ID and update /// ? changed by me
+            // Generate formatted order ID and update
             String formattedOrderId = IdFormatterUtil.generateOrderId(orderId, customer.getId());
 
             PreparedStatement updateOrder = conn.prepareStatement(EcomConstants.UPDATE_ORDER_BY_ID);
@@ -310,11 +313,11 @@ public class OrderProcessorRepositoryImpl implements IOrderProcessorRepository {
 
         } catch (SQLException | InsufficientStockException e) {
             try {
-                conn.rollback();
+                conn.rollback(); // Whatever changes made in placeOrder will be roll backed after getting exception
             } catch (SQLException ex) {
                 logger.log(Level.SEVERE, "Rollback failed", ex);
             }
-            logger.log(Level.SEVERE, "Error placing order", e);
+            logger.log(Level.SEVERE, "Error placing order");
         } finally {
             try {
                 conn.setAutoCommit(true);
@@ -329,27 +332,53 @@ public class OrderProcessorRepositoryImpl implements IOrderProcessorRepository {
 
     // Getting All orders by Customer
     @Override
-    public List<Map.Entry<Product, Integer>> getOrdersByCustomer(String formattedCustomerId) throws OrderNotFoundException {
-        List<Map.Entry<Product, Integer>> orders = new ArrayList<>();
+    public List<Order> getOrdersByCustomer(String formattedCustomerId) throws OrderNotFoundException {
+        List<Order> customerOrders = new ArrayList<>();
         int customerId = IdFormatterUtil.extractRawId(formattedCustomerId);
 
         try (PreparedStatement pstmt = conn.prepareStatement(EcomConstants.GET_ORDER_BY_CUST_ID)) {
             pstmt.setInt(1, customerId);
             ResultSet rs = pstmt.executeQuery();
+
+            Map<String, Order> orderMap = new LinkedHashMap<>();
+
             while (rs.next()) {
-                Product p = extractProductFromResultSet(rs);
-                int quantity = rs.getInt("quantity");
-                orders.add(new AbstractMap.SimpleEntry<>(p, quantity));
+                String orderId = rs.getString("order_id");
+                Date orderDate = rs.getDate("order_date");
+                String shippingAddress = rs.getString("shipping_address");
+
+                Order order = orderMap.get(orderId);
+                if (order == null) {
+                    order = new Order();
+                    order.setOrderId(orderId);
+                    order.setOrderDate(orderDate);
+                    order.setShippingAddress(shippingAddress);
+                    order.setItems(new ArrayList<>());
+                    orderMap.put(orderId, order);
+                }
+
+                Product product = extractProductFromResultSet(rs);
+                int quantity = rs.getInt("stock_quantity");
+
+                OrderItem item = new OrderItem();
+                item.setProduct(product);
+                item.setQuantity(quantity);
+
+                order.getItems().add(item);
             }
-            if (orders.isEmpty()) {
-                throw new OrderNotFoundException("No orders found for customer ID: " + formattedCustomerId); // EXCEPTION
+
+            if (orderMap.isEmpty()) {
+                throw new OrderNotFoundException("No orders found for customer ID: " + formattedCustomerId);
             }
+
+            customerOrders.addAll(orderMap.values());
+
         } catch (SQLException e) {
             logger.log(Level.SEVERE, "Error getting orders by customer", e);
         }
-        return orders;
-    }
 
+        return customerOrders;
+    }
 
 
     private Product extractProductFromResultSet(ResultSet rs) throws SQLException {

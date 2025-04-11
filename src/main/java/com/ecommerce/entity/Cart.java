@@ -3,13 +3,13 @@ package com.ecommerce.entity;
 public class Cart {
     private int id; // Database id
     private String cartId; // Format: CT-C0001P0001-01
-    private int customerId; // FK
-    private int productId; // FK
+    private Customer customerId; // FK
+    private Product productId; // FK
     private int quantity;
 
     public Cart() {}
 
-    public Cart(int id, String cartId, int customerId, int productId, int quantity) {
+    public Cart(int id, String cartId, Customer customerId, Product productId, int quantity) {
         this.id = id;
         this.cartId = cartId;
         this.customerId = customerId;
@@ -33,19 +33,19 @@ public class Cart {
         this.cartId = cartId;
     }
 
-    public int getCustomerId() {
+    public Customer getCustomerId() {
         return customerId;
     }
 
-    public void setCustomerId(int customerId) {
+    public void setCustomerId(Customer customerId) {
         this.customerId = customerId;
     }
 
-    public int getProductId() {
+    public Product getProductId() {
         return productId;
     }
 
-    public void setProductId(int productId) {
+    public void setProductId(Product productId) {
         this.productId = productId;
     }
 

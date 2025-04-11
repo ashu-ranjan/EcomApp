@@ -33,8 +33,8 @@ public class CartServiceTest {
         service = new CartService();
         repo = new OrderProcessorRepositoryImpl();
 
-        customer1 = repo.loginCustomer("rohan@gmail.com","rohan123");
-        product1 = repo.getProductByFormattedId("PROD-2025-0004");
+        customer1 = repo.loginCustomer("anjali@gmail.com","anjali12");
+        product1 = repo.getProductByFormattedId("PROD-2025-0010");
 
         customer2 = repo.loginCustomer("shivam@gmail.com","87654328");
         product2 = repo.getProductByFormattedId("PROD-2025-0004");

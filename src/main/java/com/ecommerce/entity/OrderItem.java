@@ -3,17 +3,17 @@ package com.ecommerce.entity;
 public class OrderItem {
     private int id; // Database id
     private String orderItemId; // Format: OITM-ORD0001-01
-    private int orderId;
-    private int productId;
+    private Order order;
+    private Product product;
     private int quantity;
 
     public OrderItem() {}
 
-    public OrderItem(int id, String orderItemId, int orderId, int productId, int quantity) {
+    public OrderItem(int id, String orderItemId, Order order, Product product, int quantity) {
         this.id = id;
         this.orderItemId = orderItemId;
-        this.orderId = orderId;
-        this.productId = productId;
+        this.order = order;
+        this.product = product;
         this.quantity = quantity;
     }
 
@@ -33,20 +33,20 @@ public class OrderItem {
         this.orderItemId = orderItemId;
     }
 
-    public int getOrderId() {
-        return orderId;
+    public Order getOrder() {
+        return order;
     }
 
-    public void setOrderId(int orderId) {
-        this.orderId = orderId;
+    public void setOrder(Order order) {
+        this.order = order;
     }
 
-    public int getProductId() {
-        return productId;
+    public Product getProduct() {
+        return product;
     }
 
-    public void setProductId(int productId) {
-        this.productId = productId;
+    public void setProduct(Product product) {
+        this.product = product;
     }
 
     public int getQuantity() {

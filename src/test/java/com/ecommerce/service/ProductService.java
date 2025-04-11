@@ -10,9 +10,9 @@ public class ProductService {
     // Including All Columns
     public boolean sampleProduct1(){
         Product product = new Product();
-        product.setName("Test Product");
-        product.setPrice(1499);
-        product.setDescription("Description");
+        product.setName("Test Product New");
+        product.setPrice(7777);
+        product.setDescription("For Testing Purpose");
         product.setStockQuantity(10);
 
         return repo.createProduct(product);

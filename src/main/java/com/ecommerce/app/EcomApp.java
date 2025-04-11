@@ -2,7 +2,11 @@ package com.ecommerce.app;
 
 import com.ecommerce.dao.*;
 import com.ecommerce.entity.Customer;
+import com.ecommerce.entity.Order;
+import com.ecommerce.entity.OrderItem;
 import com.ecommerce.entity.Product;
+import com.ecommerce.exception.OrderNotFoundException;
+import com.ecommerce.exception.ProductNotFoundException;
 
 import java.util.*;
 
@@ -136,12 +140,16 @@ public class EcomApp {
         int quantity = sc.nextInt();
         sc.nextLine();
 
-        Product selected = repo.getProductByFormattedId(pid);
+        try {
+            Product selected = repo.getProductByFormattedId(pid);
 
-        if (selected != null && repo.addToCart(loggedInCustomer, selected, quantity)) {
-            System.out.println("\nProduct added to cart.");
-        } else {
-            System.out.println("\nFailed to add product to cart.");
+            if (selected != null && repo.addToCart(loggedInCustomer, selected, quantity)) {
+                System.out.println("\nProduct added to cart.");
+            } else {
+                System.out.println("\nFailed to add product to cart.");
+            }
+        } catch (ProductNotFoundException e) {
+            System.err.println("Enter Valid Product ID!");;
         }
     }
 
@@ -187,7 +195,7 @@ public class EcomApp {
             sc.nextLine();
 
             if (qty > availableQty) {
-                System.out.println("Requested quantity exceeds what's in the cart. Please enter up to " + availableQty);
+                System.out.println("Requested quantity exceeds! Please enter up to " + availableQty);
                 return;
             }
             orderItems.add(new AbstractMap.SimpleEntry<>(p.getKey(), qty));
@@ -209,17 +217,31 @@ public class EcomApp {
             System.out.println("\nPlease register or login first.");
             return;
         }
-        List<Map.Entry<Product, Integer>> orders = repo.getOrdersByCustomer(loggedInCustomer.getCustomerId());
-        if (orders.isEmpty()) {
-            System.out.println("\nNo orders found.");
-        } else {
-            System.out.println("\n--- Orders ---");
-            orders.forEach(entry -> {
-                Product p = entry.getKey();
-                int qty = entry.getValue();
-                System.out.println(p.getProductId() + " | " + p.getName() + " | Quantity: " + qty);
-            });
+
+        try {
+            List<Order> orders = repo.getOrdersByCustomer(loggedInCustomer.getCustomerId());
+
+            if (orders.isEmpty()) {
+                System.out.println("\nNo orders found.");
+            } else {
+                System.out.println("\n--- Customer Orders ---");
+                for (Order order : orders) {
+                    System.out.println("Order ID   : " + order.getOrderId());
+                    System.out.println("Order Date : " + order.getOrderDate());
+                    System.out.println("Shipping   : " + order.getShippingAddress());
+                    System.out.println("Items:");
+
+                    for (OrderItem item : order.getItems()) {
+                        Product p = item.getProduct();
+                        int qty = item.getQuantity();
+                        System.out.println(" - " + p.getProductId() + " | " + p.getName() + " | Quantity: " + qty);
+                    }
+                }
+            }
+        } catch (OrderNotFoundException e) {
+            System.err.println("No orders made by Customer!!");
         }
     }
+
 }
 

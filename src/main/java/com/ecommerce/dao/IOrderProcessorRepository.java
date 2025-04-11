@@ -1,6 +1,7 @@
 package com.ecommerce.dao;
 
 import com.ecommerce.entity.Customer;
+import com.ecommerce.entity.Order;
 import com.ecommerce.entity.Product;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +25,6 @@ public interface IOrderProcessorRepository {
     List<Map.Entry<Product, Integer>> getAllFromCart(Customer customer);
 
     boolean placeOrder(Customer customer, List<Map.Entry<Product, Integer>> productsWithQuantity, String shippingAddress);
-    List<Map.Entry<Product, Integer>> getOrdersByCustomer(String customerId);
+    List<Order> getOrdersByCustomer(String customerId);
 }
 

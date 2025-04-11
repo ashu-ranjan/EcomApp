@@ -22,12 +22,20 @@ public class EcomConstants {
     public static final String INSERT_INTO_CART = "INSERT INTO cart(cart_id, customer_id, product_id, quantity) VALUES (?, ?, ?, ?)";
     public static final String GET_PROD_BY_ID = "SELECT * FROM products WHERE product_id = ?";
     public static final String DELETE_FROM_CART = "DELETE FROM cart WHERE id = ? AND id = ?";
-    public static final String GET_ALL_FROM_CART = "SELECT p.*, c.quantity FROM products p JOIN cart c ON p.id = c.product_id WHERE c.customer_id = ?";
+    public static final String GET_ALL_FROM_CART = "SELECT p.*, c.quantity " +
+                                                    "FROM products p " +
+                                                    "JOIN cart c ON p.id = c.product_id " +
+                                                    "WHERE c.customer_id = ?";
     public static final String INSERT_INTO_ORDER = "INSERT INTO orders(customer_id, order_date, total_price, shipping_address) VALUES (?, ?, ?, ?)";
     public static final String INSERT_INTO_ORDER_ITEM = "INSERT INTO order_items(order_id, product_id, quantity, order_item_id) VALUES (?, ?, ?, ?)";
     public static final String UPDATE_ORDER_BY_ID = "UPDATE orders SET order_id = ? WHERE id = ?";
     public static final String UPDATE_STOCK_QTY = "UPDATE products SET stock_quantity = stock_quantity - ? WHERE id = ?";
     public static final String DELETE_FROM_CART_BY_CID = "DELETE FROM cart WHERE customer_id = ?";
-    public static final String GET_ORDER_BY_CUST_ID = "SELECT p.*, oi.quantity " + "FROM products p " + "JOIN order_items oi ON p.id = oi.product_id " + "JOIN orders o ON oi.order_id = o.id " + "WHERE o.customer_id = ?";
-
+    public static final String GET_ORDER_BY_CUST_ID = "SELECT o.order_id, o.order_date, o.shipping_address,p.* " +
+                                                        "FROM orders o " +
+                                                        "JOIN order_items oi ON o.id = oi.order_id " +
+                                                        "JOIN products p ON oi.product_id = p.id " +
+                                                        "WHERE o.customer_id = ?";
 }
+
+
